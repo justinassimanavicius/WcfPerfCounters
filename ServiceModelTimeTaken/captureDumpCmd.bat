@@ -1,0 +1,1 @@
+﻿"c:\Program Files\Debugging Tools for Windows (x64)\adplus.exe" -hang -p %1 -Do -o c:\temp

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="31ae1624-4747-4759-a409-d1969d80394f" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>true</GenerateAsynchronousMethods>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:8080/IStockMarket" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="IStockMarket.xsd" MetadataType="Schema" ID="583a6f4a-fbbd-46f9-b688-9f5ac7f9c81b" SourceId="1" SourceUrl="http://localhost:8080/IStockMarket?xsd=xsd1" />
+    <MetadataFile FileName="IStockMarket1.xsd" MetadataType="Schema" ID="c240208d-69a0-493b-a5c0-ea86f93a75b6" SourceId="1" SourceUrl="http://localhost:8080/IStockMarket?xsd=xsd0" />
+    <MetadataFile FileName="IStockMarket.disco" MetadataType="Disco" ID="8a32404b-262b-42dc-92c0-da2b6cf9bd6e" SourceId="1" SourceUrl="http://localhost:8080/IStockMarket?disco" />
+    <MetadataFile FileName="StockMarket.wsdl" MetadataType="Wsdl" ID="47c2c6ec-ad0a-483a-b335-f8565c27b5f3" SourceId="1" SourceUrl="http://localhost:8080/IStockMarket?wsdl" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>
