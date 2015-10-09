@@ -1,209 +1,217 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 
 namespace ServiceModelTimeTaken
 {
-    internal enum CustomPerfmonCounterType
-    {
-        EXECUTING,
-        TIMETAKEN
-    }
-    class ServiceModelTimeTakenThreadPool
-    {
-        private ServiceModelTimeTakenConfig _serviceModelTimeTakenConfig = new ServiceModelTimeTakenConfig() { bHangDump = false };
-        private Dictionary<long, string> _currentRunningRequests = new Dictionary<long, string>();
-        
-        private class PerfmonWorkItem
-        {
-            public string action;
-            public int duration;
-            public CustomPerfmonCounterType ctype;
-            public long startTicks;
-            public string incomingMessage;
-        }
-        private Semaphore _workWaiting;
-        private ManualResetEvent _pollingEvent; 
-        private Queue<PerfmonWorkItem> _queue;
-        private List<Thread> _threads;
+	internal enum CustomPerfmonCounterType
+	{
+		EXECUTING,
+		TIMETAKEN
+	}
 
-        private long _dumpstartTicks;
-        private string _dumpIncomingMessage;
-        private int _dumpCount;
+	internal class ServiceModelTimeTakenThreadPool
+	{
+		private readonly Dictionary<long, string> _currentRunningRequests = new Dictionary<long, string>();
 
-        public ServiceModelTimeTakenThreadPool(int numThreads)
-        {
-            if (numThreads <= 0)
-                throw new ArgumentOutOfRangeException("numThreads");
+		private readonly Queue<PerfmonWorkItem> _queue;
+		private readonly List<Thread> _threads;
+		private readonly Semaphore _workWaiting;
 
-            _threads = new List<Thread>(numThreads);
-            _queue = new Queue<PerfmonWorkItem>();
-            _workWaiting = new Semaphore(0, int.MaxValue);
+		private int _dumpCount;
+		private string _dumpIncomingMessage;
+		private long _dumpstartTicks;
+		private ManualResetEvent _pollingEvent;
 
-            _dumpCount = 0;
+		private ServiceModelTimeTakenConfig _serviceModelTimeTakenConfig = new ServiceModelTimeTakenConfig()
+		{
+			bHangDump = false
+		};
 
-            for (int i = 0; i < numThreads; i++)
-            {
-                Thread t = new Thread(Run);
-                t.IsBackground = true;
-                _threads.Add(t);
-                t.Start();
-            }
-        }
+		public ServiceModelTimeTakenThreadPool(int numThreads)
+		{
+			if (numThreads <= 0)
+				throw new ArgumentOutOfRangeException("numThreads");
 
-        public void StartHangDumpThread(ServiceModelTimeTakenConfig config)
-        {
-            _pollingEvent = new ManualResetEvent(false);
-            _serviceModelTimeTakenConfig = config;
+			_threads = new List<Thread>(numThreads);
+			_queue = new Queue<PerfmonWorkItem>();
+			_workWaiting = new Semaphore(0, int.MaxValue);
 
-            Thread t = new Thread(HangDumpThread);
-            t.IsBackground = true;
-            _threads.Add(t);
-            t.Start();
-        }    
+			_dumpCount = 0;
 
-        public void QueuePerfmonWorkItem(CustomPerfmonCounterType ctype, string action, int duration, long startTicks, string incomingMessage)
-        {
-            PerfmonWorkItem item = new PerfmonWorkItem();
-            item.ctype = ctype;
-            item.action = action;
-            item.duration = duration;
-            item.startTicks = startTicks;
-            item.incomingMessage = incomingMessage; 
+			for (int i = 0; i < numThreads; i++)
+			{
+				var t = new Thread(Run);
+				t.IsBackground = true;
+				_threads.Add(t);
+				t.Start();
+			}
+		}
 
-            lock (_queue) _queue.Enqueue(item);
-            _workWaiting.Release();
-        }
+		public void StartHangDumpThread(ServiceModelTimeTakenConfig config)
+		{
+			_pollingEvent = new ManualResetEvent(false);
+			_serviceModelTimeTakenConfig = config;
 
-        private void Run()
-        {
-            try
-            {
-                while (true)
-                {   
-                    PerfmonWorkItem item = null;
+			var t = new Thread(HangDumpThread);
+			t.IsBackground = true;
+			_threads.Add(t);
+			t.Start();
+		}
 
-                    while (item == null)
-                    {
-                        lock (_queue)
-                        {
-                            if (_queue.Count > 0)
-                            {
-                                item = _queue.Dequeue();
-                                break;
-                            }
-                        }
-                        _workWaiting.WaitOne();
-                    }
-                    //
-                    //  get the performance counter
-                    //
-                    GroupPerformanceCounter gpc = ServiceModelTimeTakenPerfmonCounters.GetCounter(item.action);
-                    if (gpc != null)
-                    {
-                        //
-                        //  set the values
-                        //
-                        switch (item.ctype)
-                        {
-                            case CustomPerfmonCounterType.EXECUTING:
-                                {
-                                    if (_serviceModelTimeTakenConfig.bHangDump)
-                                    {
-                                        lock (_currentRunningRequests)
-                                        {
-                                            try
-                                            {
-                                                //
-                                                //  we may get two requests with same tick value
-                                                //
-                                                _currentRunningRequests.Add(item.startTicks, item.incomingMessage);
-                                            }
-                                            catch
-                                            {
-                                            }
-                                        }
-                                    }
-                                    gpc.Executing.Increment();
-                                    
-                                    break;
-                                }
-                            case CustomPerfmonCounterType.TIMETAKEN:
-                                {
-                                    if (_serviceModelTimeTakenConfig.bHangDump)
-                                    {
-                                        lock (_currentRunningRequests)
-                                        {
-                                            _currentRunningRequests.Remove(item.startTicks);
-                                        }
-                                    }
-                                    gpc.Executing.Decrement();
-                                    gpc.Hits.Increment();                                    
-                                    gpc.TimeTaken.RawValue = item.duration;
+		public void QueuePerfmonWorkItem(CustomPerfmonCounterType ctype, string action, int duration, long startTicks,
+			string incomingMessage)
+		{
+			var item = new PerfmonWorkItem();
+			item.ctype = ctype;
+			item.action = action;
+			item.duration = duration;
+			item.startTicks = startTicks;
+			item.incomingMessage = incomingMessage;
 
-                                    break;
-                                }
-                        }
-                    }
-                }
-            }
-            catch  { }
-        }
+			lock (_queue) _queue.Enqueue(item);
+			_workWaiting.Release();
+		}
 
-        
-        private void HangDumpThread()
-        {
-            bool bCaptureDump = false;
-            try
-            {
-                while (true)
-                {
-                    _pollingEvent.WaitOne(_serviceModelTimeTakenConfig.pollIntervalSeconds * 1000 );
+		private void Run()
+		{
+			try
+			{
+				while (true)
+				{
+					PerfmonWorkItem item = null;
 
-                    long lastTicks = DateTime.Now.Ticks - (_serviceModelTimeTakenConfig.captureDumpAfterSeconds * 10000000);
-                    
-                    lock (_currentRunningRequests)
-                    {
-                        foreach (long startTicks in _currentRunningRequests.Keys)
-                        {
-                            if (startTicks < lastTicks)
-                            {
-                                _dumpstartTicks = startTicks;
-                                _dumpIncomingMessage = _currentRunningRequests[startTicks];
+					while (item == null)
+					{
+						lock (_queue)
+						{
+							if (_queue.Count > 0)
+							{
+								item = _queue.Dequeue();
+								break;
+							}
+						}
+						_workWaiting.WaitOne();
+					}
+					//
+					//  get the performance counter
+					//
+					GroupPerformanceCounter gpc = ServiceModelTimeTakenPerfmonCounters.GetCounter(item.action);
+					if (gpc != null)
+					{
+						//
+						//  set the values
+						//
+						switch (item.ctype)
+						{
+							case CustomPerfmonCounterType.EXECUTING:
+							{
+								if (_serviceModelTimeTakenConfig.bHangDump)
+								{
+									lock (_currentRunningRequests)
+									{
+										try
+										{
+											//
+											//  we may get two requests with same tick value
+											//
+											_currentRunningRequests.Add(item.startTicks, item.incomingMessage);
+										}
+										catch
+										{
+										}
+									}
+								}
+								gpc.Executing.Increment();
 
-                                if (_dumpCount < _serviceModelTimeTakenConfig.dumpLimit)
-                                {
-                                    _dumpCount++;
-                                    //capture a dump
-                                    bCaptureDump = true;
-                                }
-                                break;
-                            }
-                        }
-                    }
+								break;
+							}
+							case CustomPerfmonCounterType.TIMETAKEN:
+							{
+								if (_serviceModelTimeTakenConfig.bHangDump)
+								{
+									lock (_currentRunningRequests)
+									{
+										_currentRunningRequests.Remove(item.startTicks);
+									}
+								}
+								gpc.Executing.Decrement();
+								gpc.Hits.Increment();
+								gpc.TimeTaken.RawValue = item.duration;
 
-                    if (bCaptureDump)
-                    {
-                        Process.Start(_serviceModelTimeTakenConfig.dumpCmd, Process.GetCurrentProcess().Id.ToString());
+								break;
+							}
+						}
+					}
+				}
+			}
+			catch
+			{
+			}
+		}
 
-                        bCaptureDump = false;
 
-                        //
-                        //  capture only one dump per request
-                        //      remove this request from our list of running requests
-                        //
-                        lock (_currentRunningRequests)
-                        {
-                            _currentRunningRequests.Remove(_dumpstartTicks);
-                        }
-                    }
+		private void HangDumpThread()
+		{
+			bool bCaptureDump = false;
+			try
+			{
+				while (true)
+				{
+					_pollingEvent.WaitOne(_serviceModelTimeTakenConfig.pollIntervalSeconds*1000);
 
-                }
-            }
-            catch { }
-        }
-    }
+					long lastTicks = DateTime.Now.Ticks - (_serviceModelTimeTakenConfig.captureDumpAfterSeconds*10000000);
+
+					lock (_currentRunningRequests)
+					{
+						foreach (long startTicks in _currentRunningRequests.Keys)
+						{
+							if (startTicks < lastTicks)
+							{
+								_dumpstartTicks = startTicks;
+								_dumpIncomingMessage = _currentRunningRequests[startTicks];
+
+								if (_dumpCount < _serviceModelTimeTakenConfig.dumpLimit)
+								{
+									_dumpCount++;
+									//capture a dump
+									bCaptureDump = true;
+								}
+								break;
+							}
+						}
+					}
+
+					if (bCaptureDump)
+					{
+						Process.Start(_serviceModelTimeTakenConfig.dumpCmd, Process.GetCurrentProcess().Id.ToString());
+
+						bCaptureDump = false;
+
+						//
+						//  capture only one dump per request
+						//      remove this request from our list of running requests
+						//
+						lock (_currentRunningRequests)
+						{
+							_currentRunningRequests.Remove(_dumpstartTicks);
+						}
+					}
+				}
+			}
+			catch
+			{
+			}
+		}
+
+		private class PerfmonWorkItem
+		{
+			public string action;
+			public CustomPerfmonCounterType ctype;
+			public int duration;
+			public string incomingMessage;
+			public long startTicks;
+		}
+	}
 }

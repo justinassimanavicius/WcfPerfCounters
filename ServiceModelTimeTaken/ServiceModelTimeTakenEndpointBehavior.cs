@@ -1,38 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.ServiceModel.Dispatcher;
-using System.Text;
+﻿using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
+using System.ServiceModel.Dispatcher;
 
 namespace ServiceModelTimeTaken
 {
-    class ServiceModelTimeTakenEndpointBehavior : IEndpointBehavior
-    {
-        private ServiceModelTimeTakenConfig serviceModelTimeTakenConfig;
-        public ServiceModelTimeTakenEndpointBehavior(ServiceModelTimeTakenConfig config)
-        {
-            serviceModelTimeTakenConfig = config;
-        }
+	internal class ServiceModelTimeTakenEndpointBehavior : IEndpointBehavior
+	{
+		private readonly ServiceModelTimeTakenConfig serviceModelTimeTakenConfig;
 
-        public void ApplyDispatchBehavior(ServiceEndpoint endpoint,
-            System.ServiceModel.Dispatcher.EndpointDispatcher endpointDispatcher)
-        {
-            endpointDispatcher.DispatchRuntime.MessageInspectors.Add(
-                new ServiceModelTimeTakenMessageInspector(serviceModelTimeTakenConfig));
-        }
+		public ServiceModelTimeTakenEndpointBehavior(ServiceModelTimeTakenConfig config)
+		{
+			serviceModelTimeTakenConfig = config;
+		}
 
-        public void AddBindingParameters(ServiceEndpoint endpoint, System.ServiceModel.Channels.BindingParameterCollection bindingParameters)
-        {
-        }
-        
+		public void ApplyDispatchBehavior(ServiceEndpoint endpoint,
+			EndpointDispatcher endpointDispatcher)
+		{
+			endpointDispatcher.DispatchRuntime.MessageInspectors.Add(
+				new ServiceModelTimeTakenMessageInspector(serviceModelTimeTakenConfig));
+		}
+
+		public void AddBindingParameters(ServiceEndpoint endpoint, BindingParameterCollection bindingParameters)
+		{
+		}
+
 		public void ApplyClientBehavior(ServiceEndpoint endpoint, ClientRuntime clientRuntime)
 		{
 			clientRuntime.MessageInspectors.Add(new ServiceModelTimeTakenMessageInspector(serviceModelTimeTakenConfig));
 		}
 
-        public void Validate(ServiceEndpoint endpoint)
-        {
-        }
-    }
+		public void Validate(ServiceEndpoint endpoint)
+		{
+		}
+	}
 }

@@ -1,58 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using System.Text;
 using System.ServiceModel.Dispatcher;
 using System.Text.RegularExpressions;
 
 namespace ServiceModelTimeTaken
 {
-	class ServiceModelTimeTakenMessageInspector : IClientMessageInspector ,IDispatchMessageInspector
-    {
-        public ServiceModelTimeTakenMessageInspector(ServiceModelTimeTakenConfig config)
-        {
-            if (config.bHangDump)
-            {
-                _customThreadPool.StartHangDumpThread(config);
-            }
-        }
+	internal class ServiceModelTimeTakenMessageInspector : IClientMessageInspector, IDispatchMessageInspector
+	{
+		private static readonly ServiceModelTimeTakenThreadPool _customThreadPool = new ServiceModelTimeTakenThreadPool(1);
 
-        static ServiceModelTimeTakenThreadPool _customThreadPool = new ServiceModelTimeTakenThreadPool(1);
-        
-		static Regex rgx = new Regex("[^a-zA-Z0-9 -]", RegexOptions.Compiled);
+		private static readonly Regex rgx = new Regex("[^a-zA-Z0-9 -]", RegexOptions.Compiled);
 
-        
-        public object AfterReceiveRequest(ref System.ServiceModel.Channels.Message request, 
-                                                System.ServiceModel.IClientChannel channel, 
-                                                System.ServiceModel.InstanceContext instanceContext)
-        {
-            long ticks =  DateTime.Now.Ticks;
+		public ServiceModelTimeTakenMessageInspector(ServiceModelTimeTakenConfig config)
+		{
+			if (config.bHangDump)
+			{
+				_customThreadPool.StartHangDumpThread(config);
+			}
+		}
 
-
-            _customThreadPool.QueuePerfmonWorkItem(CustomPerfmonCounterType.EXECUTING, request.Headers.Action, 0, ticks, request.ToString());
-            return ticks;
-        }
-
-        public void BeforeSendReply(ref System.ServiceModel.Channels.Message reply, 
-                                    object correlationState)
-        {
-            long startime = (long)correlationState;
-
-            TimeSpan elapsedSpan = new TimeSpan(DateTime.Now.Ticks - startime);
-
-            _customThreadPool.QueuePerfmonWorkItem(CustomPerfmonCounterType.TIMETAKEN, reply.Headers.Action, (int)elapsedSpan.TotalMilliseconds, startime, string.Empty);
-
-            
-        }
 
 		public object BeforeSendRequest(ref Message request, IClientChannel channel)
 		{
 			long ticks = DateTime.Now.Ticks;
 
 
-			var action = request.Headers.Action ?? "Unknown";
+			string action = request.Headers.Action ?? "Unknown";
 
 			action = rgx.Replace(action, "");
 			_customThreadPool.QueuePerfmonWorkItem(CustomPerfmonCounterType.EXECUTING, action, 0, ticks, request.ToString());
@@ -66,14 +40,36 @@ namespace ServiceModelTimeTaken
 
 		public void AfterReceiveReply(ref Message reply, object correlationState)
 		{
-			ServiceCallInfo callInfo = (ServiceCallInfo)correlationState;
+			var callInfo = (ServiceCallInfo) correlationState;
 
-			TimeSpan elapsedSpan = new TimeSpan(DateTime.Now.Ticks - callInfo.Ticks);
+			var elapsedSpan = new TimeSpan(DateTime.Now.Ticks - callInfo.Ticks);
 
-			
-			_customThreadPool.QueuePerfmonWorkItem(CustomPerfmonCounterType.TIMETAKEN, callInfo.Action, (int)elapsedSpan.TotalMilliseconds, callInfo.Ticks, string.Empty);
 
-            
+			_customThreadPool.QueuePerfmonWorkItem(CustomPerfmonCounterType.TIMETAKEN, callInfo.Action,
+				(int) elapsedSpan.TotalMilliseconds, callInfo.Ticks, string.Empty);
+		}
+
+		public object AfterReceiveRequest(ref Message request,
+			IClientChannel channel,
+			InstanceContext instanceContext)
+		{
+			long ticks = DateTime.Now.Ticks;
+
+
+			_customThreadPool.QueuePerfmonWorkItem(CustomPerfmonCounterType.EXECUTING, request.Headers.Action, 0, ticks,
+				request.ToString());
+			return ticks;
+		}
+
+		public void BeforeSendReply(ref Message reply,
+			object correlationState)
+		{
+			var startime = (long) correlationState;
+
+			var elapsedSpan = new TimeSpan(DateTime.Now.Ticks - startime);
+
+			_customThreadPool.QueuePerfmonWorkItem(CustomPerfmonCounterType.TIMETAKEN, reply.Headers.Action,
+				(int) elapsedSpan.TotalMilliseconds, startime, string.Empty);
 		}
 
 
@@ -82,5 +78,5 @@ namespace ServiceModelTimeTaken
 			public string Action;
 			public long Ticks;
 		}
-    }
+	}
 }
