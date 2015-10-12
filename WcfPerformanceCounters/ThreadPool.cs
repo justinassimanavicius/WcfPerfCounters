@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace ServiceModelTimeTaken
+namespace WcfPerformanceCounters
 {
 	internal enum CustomPerfmonCounterType
 	{
@@ -11,7 +11,7 @@ namespace ServiceModelTimeTaken
 		TIMETAKEN
 	}
 
-	internal class ServiceModelTimeTakenThreadPool
+	internal class ThreadPool
 	{
 		private readonly Dictionary<long, string> _currentRunningRequests = new Dictionary<long, string>();
 
@@ -24,12 +24,12 @@ namespace ServiceModelTimeTaken
 		private long _dumpstartTicks;
 		private ManualResetEvent _pollingEvent;
 
-		private ServiceModelTimeTakenConfig _serviceModelTimeTakenConfig = new ServiceModelTimeTakenConfig()
+		private WcfPerformanceCountersConfig _wcfPerformanceCountersConfig = new WcfPerformanceCountersConfig()
 		{
 			bHangDump = false
 		};
 
-		public ServiceModelTimeTakenThreadPool(int numThreads)
+		public ThreadPool(int numThreads)
 		{
 			if (numThreads <= 0)
 				throw new ArgumentOutOfRangeException("numThreads");
@@ -49,10 +49,10 @@ namespace ServiceModelTimeTaken
 			}
 		}
 
-		public void StartHangDumpThread(ServiceModelTimeTakenConfig config)
+		public void StartHangDumpThread(WcfPerformanceCountersConfig config)
 		{
 			_pollingEvent = new ManualResetEvent(false);
-			_serviceModelTimeTakenConfig = config;
+			_wcfPerformanceCountersConfig = config;
 
 			var t = new Thread(HangDumpThread);
 			t.IsBackground = true;
@@ -97,7 +97,7 @@ namespace ServiceModelTimeTaken
 					//
 					//  get the performance counter
 					//
-					GroupPerformanceCounter gpc = ServiceModelTimeTakenPerfmonCounters.GetCounter(item.action);
+					GroupPerformanceCounter gpc = PerfmonCounters.GetCounter(item.action);
 					if (gpc != null)
 					{
 						//
@@ -107,7 +107,7 @@ namespace ServiceModelTimeTaken
 						{
 							case CustomPerfmonCounterType.EXECUTING:
 							{
-								if (_serviceModelTimeTakenConfig.bHangDump)
+								if (_wcfPerformanceCountersConfig.bHangDump)
 								{
 									lock (_currentRunningRequests)
 									{
@@ -129,7 +129,7 @@ namespace ServiceModelTimeTaken
 							}
 							case CustomPerfmonCounterType.TIMETAKEN:
 							{
-								if (_serviceModelTimeTakenConfig.bHangDump)
+								if (_wcfPerformanceCountersConfig.bHangDump)
 								{
 									lock (_currentRunningRequests)
 									{
@@ -159,9 +159,9 @@ namespace ServiceModelTimeTaken
 			{
 				while (true)
 				{
-					_pollingEvent.WaitOne(_serviceModelTimeTakenConfig.pollIntervalSeconds*1000);
+					_pollingEvent.WaitOne(_wcfPerformanceCountersConfig.pollIntervalSeconds*1000);
 
-					long lastTicks = DateTime.Now.Ticks - (_serviceModelTimeTakenConfig.captureDumpAfterSeconds*10000000);
+					long lastTicks = DateTime.Now.Ticks - (_wcfPerformanceCountersConfig.captureDumpAfterSeconds*10000000);
 
 					lock (_currentRunningRequests)
 					{
@@ -172,7 +172,7 @@ namespace ServiceModelTimeTaken
 								_dumpstartTicks = startTicks;
 								_dumpIncomingMessage = _currentRunningRequests[startTicks];
 
-								if (_dumpCount < _serviceModelTimeTakenConfig.dumpLimit)
+								if (_dumpCount < _wcfPerformanceCountersConfig.dumpLimit)
 								{
 									_dumpCount++;
 									//capture a dump
@@ -185,7 +185,7 @@ namespace ServiceModelTimeTaken
 
 					if (bCaptureDump)
 					{
-						Process.Start(_serviceModelTimeTakenConfig.dumpCmd, Process.GetCurrentProcess().Id.ToString());
+						Process.Start(_wcfPerformanceCountersConfig.dumpCmd, Process.GetCurrentProcess().Id.ToString());
 
 						bCaptureDump = false;
 

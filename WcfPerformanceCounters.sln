@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceModelTimeTaken", "ServiceModelTimeTaken\ServiceModelTimeTaken.csproj", "{A1995835-1F42-4358-A14D-1AF8E3F0CAC1}"
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WcfPerformanceCounters", "WcfPerformanceCounters\WcfPerformanceCounters.csproj", "{A1995835-1F42-4358-A14D-1AF8E3F0CAC1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Host", "Host\Host.csproj", "{0D0B31DB-0D7B-4B64-96AF-6087884E6174}"
 EndProject

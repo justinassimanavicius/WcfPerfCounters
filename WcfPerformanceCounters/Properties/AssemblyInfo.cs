@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ServiceModelTimeTaken")]
+[assembly: AssemblyTitle("WcfPerformanceCounters")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft IT")]
-[assembly: AssemblyProduct("ServiceModelTimeTaken")]
+[assembly: AssemblyProduct("WcfPerformanceCounters")]
 [assembly: AssemblyCopyright("Copyright © Microsoft IT 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <!--<projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Wcf endpoint behavior, that allows track call counts and times of wcf clients.</description>
+    <releaseNotes>Initial $title$ NuGet package creation.</releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <!--<tags>Tag1 Tag2</tags>-->
+  </metadata>
+	<files>
+		<file src="content\app.config.transform" target="content\app.config.transform" />
+		<file src="content\Web.config.transform" target="content\Web.config.transform" />
+		<file src="bin\$configuration$\$id$.pdb" target="lib\net40\" />
+	</files>
+</package>

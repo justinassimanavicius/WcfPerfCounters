@@ -2,22 +2,22 @@
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
 
-namespace ServiceModelTimeTaken
+namespace WcfPerformanceCounters
 {
-	internal class ServiceModelTimeTakenEndpointBehavior : IEndpointBehavior
+	internal class WcfPerformanceCountersEndpointBehavior : IEndpointBehavior
 	{
-		private readonly ServiceModelTimeTakenConfig serviceModelTimeTakenConfig;
+		private readonly WcfPerformanceCountersConfig _wcfPerformanceCountersConfig;
 
-		public ServiceModelTimeTakenEndpointBehavior(ServiceModelTimeTakenConfig config)
+		public WcfPerformanceCountersEndpointBehavior(WcfPerformanceCountersConfig config)
 		{
-			serviceModelTimeTakenConfig = config;
+			_wcfPerformanceCountersConfig = config;
 		}
 
 		public void ApplyDispatchBehavior(ServiceEndpoint endpoint,
 			EndpointDispatcher endpointDispatcher)
 		{
 			endpointDispatcher.DispatchRuntime.MessageInspectors.Add(
-				new ServiceModelTimeTakenMessageInspector(serviceModelTimeTakenConfig));
+				new MessageInspector(_wcfPerformanceCountersConfig));
 		}
 
 		public void AddBindingParameters(ServiceEndpoint endpoint, BindingParameterCollection bindingParameters)
@@ -26,7 +26,7 @@ namespace ServiceModelTimeTaken
 
 		public void ApplyClientBehavior(ServiceEndpoint endpoint, ClientRuntime clientRuntime)
 		{
-			clientRuntime.MessageInspectors.Add(new ServiceModelTimeTakenMessageInspector(serviceModelTimeTakenConfig));
+			clientRuntime.MessageInspectors.Add(new MessageInspector(_wcfPerformanceCountersConfig));
 		}
 
 		public void Validate(ServiceEndpoint endpoint)

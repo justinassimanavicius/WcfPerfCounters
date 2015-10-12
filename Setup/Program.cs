@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using WcfPerformanceCounters;
 
 namespace Setup
 {
@@ -20,14 +21,14 @@ namespace Setup
 
 				if (String.Compare(args[0], "-i", StringComparison.OrdinalIgnoreCase) == 0)
 				{
-					ServiceModelTimeTaken.ServiceModelTimeTakenPerfmonCounters.DeleteCategory();
-					ServiceModelTimeTaken.ServiceModelTimeTakenPerfmonCounters.CreateCategory();
+					PerfmonCounters.DeleteCategory();
+					PerfmonCounters.CreateCategory();
 
 					Console.WriteLine("ServiceModelTimeTaken perfmon counters installed.");
 				}
 				else if (String.Compare(args[0], "-u", StringComparison.OrdinalIgnoreCase) == 0)
 				{
-					ServiceModelTimeTaken.ServiceModelTimeTakenPerfmonCounters.DeleteCategory();
+					PerfmonCounters.DeleteCategory();
 
 					Console.WriteLine("ServiceModelTimeTaken perfmon counters uninstalled.");
 				}

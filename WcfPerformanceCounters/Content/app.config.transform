@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<configuration >
+	<system.serviceModel>
+		<extensions>
+			<behaviorExtensions>
+				<add name="WcfPerformanceCounters" type="WcfPerformanceCounters.WcfPerformanceCountersBehaviorExtensionElement, WcfPerformanceCounters" />
+			</behaviorExtensions>
+			</extensions>
+			<behaviors>
+				<endpointBehaviors>
+					<behavior name="WcfPerformanceCounters" >
+						<WcfPerformanceCounters />
+					</behavior>
+				</endpointBehaviors>
+			</behaviors>
+		</system.serviceModel>
+</configuration>

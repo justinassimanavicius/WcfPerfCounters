@@ -3,16 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace ServiceModelTimeTaken
+namespace WcfPerformanceCounters
 {
-	public class GroupPerformanceCounter
-	{
-		public PerformanceCounter Executing;
-		public PerformanceCounter Hits;
-		public PerformanceCounter TimeTaken;
-	}
-
-	public class ServiceModelTimeTakenPerfmonCounters
+	public class PerfmonCounters
 	{
 		private static readonly ReaderWriterLockSlim _rwlock = new ReaderWriterLockSlim();
 

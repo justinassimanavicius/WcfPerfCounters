@@ -4,15 +4,15 @@ using System.ServiceModel.Channels;
 using System.ServiceModel.Dispatcher;
 using System.Text.RegularExpressions;
 
-namespace ServiceModelTimeTaken
+namespace WcfPerformanceCounters
 {
-	internal class ServiceModelTimeTakenMessageInspector : IClientMessageInspector, IDispatchMessageInspector
+	internal class MessageInspector : IClientMessageInspector, IDispatchMessageInspector
 	{
-		private static readonly ServiceModelTimeTakenThreadPool _customThreadPool = new ServiceModelTimeTakenThreadPool(1);
+		private static readonly ThreadPool _customThreadPool = new ThreadPool(1);
 
 		private static readonly Regex rgx = new Regex("[^a-zA-Z0-9 -]", RegexOptions.Compiled);
 
-		public ServiceModelTimeTakenMessageInspector(ServiceModelTimeTakenConfig config)
+		public MessageInspector(WcfPerformanceCountersConfig config)
 		{
 			if (config.bHangDump)
 			{
@@ -28,7 +28,7 @@ namespace ServiceModelTimeTaken
 
 			string action = request.Headers.Action ?? "Unknown";
 
-			action = rgx.Replace(action, "");
+			action = rgx.Replace(action, "_");
 			_customThreadPool.QueuePerfmonWorkItem(CustomPerfmonCounterType.EXECUTING, action, 0, ticks, request.ToString());
 
 			ServiceCallInfo callInfo;

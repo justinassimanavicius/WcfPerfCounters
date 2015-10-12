@@ -2,22 +2,13 @@
 using System.Configuration;
 using System.ServiceModel.Configuration;
 
-namespace ServiceModelTimeTaken
+namespace WcfPerformanceCounters
 {
-	internal class ServiceModelTimeTakenConfig
-	{
-		public bool bHangDump;
-		public long captureDumpAfterSeconds;
-		public string dumpCmd;
-		public int dumpLimit;
-		public int pollIntervalSeconds; // in milliseconds
-	}
-
-	internal class ServiceModelTimeTakenBehaviorExtensionElement : BehaviorExtensionElement
+	internal class WcfPerformanceCountersBehaviorExtensionElement : BehaviorExtensionElement
 	{
 		public override Type BehaviorType
 		{
-			get { return typeof (ServiceModelTimeTakenEndpointBehavior); }
+			get { return typeof (WcfPerformanceCountersEndpointBehavior); }
 		}
 
 
@@ -47,7 +38,7 @@ namespace ServiceModelTimeTaken
 
 		protected override object CreateBehavior()
 		{
-			var config = new ServiceModelTimeTakenConfig()
+			var config = new WcfPerformanceCountersConfig()
 			{
 				dumpCmd = dumpCmd,
 				captureDumpAfterSeconds = captureDumpAfterSeconds,
@@ -74,7 +65,7 @@ namespace ServiceModelTimeTaken
 					config.bHangDump = false;
 				}
 			}
-			return new ServiceModelTimeTakenEndpointBehavior(config);
+			return new WcfPerformanceCountersEndpointBehavior(config);
 		}
 	}
 }
