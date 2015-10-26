@@ -48,6 +48,10 @@ namespace WcfPerformanceCounters
 			//
 			//  remove the response text from the action
 			//
+			if (string.IsNullOrWhiteSpace(action))
+			{
+				action = "unknown";
+			}
 			if (action.EndsWith("Response", StringComparison.OrdinalIgnoreCase))
 			{
 				action = action.Remove(action.Length - 8);
@@ -57,19 +61,25 @@ namespace WcfPerformanceCounters
 				action = action.Remove(200);
 			}
 			action = action.Replace('/', '-');
-			GroupPerformanceCounter ret = null;
+			GroupPerformanceCounter group = null;
 
 			//
 			//  check if we have our perfmon counter 
 			//      for this action in our dictionary object
 			//  
-			_rwlock.EnterReadLock();
-			if (_dictionaryPerfCounters.TryGetValue(action, out ret))
+			
+			try
+			{
+				_rwlock.EnterReadLock();
+				if (_dictionaryPerfCounters.TryGetValue(action, out group))
+				{
+					return group;
+				}
+			}
+			finally
 			{
 				_rwlock.ExitReadLock();
-				return ret;
 			}
-			_rwlock.ExitReadLock();
 
 			//
 			//  get the writer lock
@@ -80,36 +90,48 @@ namespace WcfPerformanceCounters
 				//
 				//  double check
 				//
-				if (_dictionaryPerfCounters.TryGetValue(action, out ret))
+				if (_dictionaryPerfCounters.TryGetValue(action, out group))
 				{
-					return ret;
+					return group;
 				}
 				//
 				//  check if the category exists
 				//
-				if (PerformanceCounterCategory.Exists("ServiceModelTimeTaken"))
-				{
-					//
-					//  create instance
-					//
-					ret = new GroupPerformanceCounter();
-					ret.Executing = new PerformanceCounter("ServiceModelTimeTaken", "Executing", action, false);
-					ret.Hits = new PerformanceCounter("ServiceModelTimeTaken", "Hits", action, false);
-					ret.TimeTaken = new PerformanceCounter("ServiceModelTimeTaken", "TimeTaken", action, false);
-
-					ret.Executing.RawValue = 0;
-					ret.Hits.RawValue = 0;
-					ret.TimeTaken.RawValue = 0;
-
-					_dictionaryPerfCounters.Add(action, ret);
-				}
+				group = CreateGroupPerformanceCounter(action);
+					_dictionaryPerfCounters.Add(action, group);
+				
 			}
 			finally
 			{
 				_rwlock.ExitWriteLock();
 			}
 
-			return ret;
+			return group;
+		}
+
+		private static GroupPerformanceCounter CreateGroupPerformanceCounter(string action)
+		{
+
+			if (!PerformanceCounterCategory.Exists("ServiceModelTimeTaken"))
+			{
+				return null;
+			}
+
+			//
+			//  create instance
+			//
+			var result = new GroupPerformanceCounter
+			{
+				Executing = new PerformanceCounter("ServiceModelTimeTaken", "Executing", action, false),
+				Hits = new PerformanceCounter("ServiceModelTimeTaken", "Hits", action, false),
+				TimeTaken = new PerformanceCounter("ServiceModelTimeTaken", "TimeTaken", action, false)
+			};
+
+			result.Executing.RawValue = 0;
+			result.Hits.RawValue = 0;
+			result.TimeTaken.RawValue = 0;
+			return result;
+
 		}
 	}
 }

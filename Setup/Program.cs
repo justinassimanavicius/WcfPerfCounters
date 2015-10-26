@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using WcfPerformanceCounters;
 
 namespace Setup
@@ -12,6 +13,7 @@ namespace Setup
 		{
 			try
 			{
+
 				if (!args.Any())
 				{
 					Console.WriteLine("ServiceModelTimeTaken perfmon counters....");
@@ -31,6 +33,21 @@ namespace Setup
 					PerfmonCounters.DeleteCategory();
 
 					Console.WriteLine("ServiceModelTimeTaken perfmon counters uninstalled.");
+				}
+				else if (String.Compare(args[0], "-p", StringComparison.OrdinalIgnoreCase) == 0)
+				{
+					int i = int.MaxValue - 10;
+					while (! Console.KeyAvailable)
+					{
+						i += 1;
+						var perfConter = PerfmonCounters.GetCounter("test");
+						Thread.Sleep(500);
+						perfConter.Executing.RawValue = i;// DateTime.Now.Second % 19;
+						perfConter.Hits.RawValue = DateTime.Now.Second % 4;
+						perfConter.TimeTaken.RawValue = DateTime.Now.Second % 7;
+
+						Console.WriteLine("ServiceModelTimeTaken perfmon counters updated. "+ i);
+					}
 				}
 				else
 				{

@@ -66,7 +66,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ServiceModelTimeTaken\WcfPerformanceCounters.csproj">
+    <ProjectReference Include="..\WcfPerformanceCounters\WcfPerformanceCounters.csproj">
       <Project>{A1995835-1F42-4358-A14D-1AF8E3F0CAC1}</Project>
       <Name>WcfPerformanceCounters</Name>
     </ProjectReference>

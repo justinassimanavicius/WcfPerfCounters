@@ -1,0 +1,1 @@
+nuget pack WcfPerformanceCounters/WcfPerformanceCounters.csproj
