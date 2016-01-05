@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-16"?>
+<ArrayOfPerfCounter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<PerfCounter>
+		<Id>\Processor Information(_Total)\% Processor Time</Id>
+		<Name>processor</Name>
+	</PerfCounter>
+	<PerfCounter>
+		<Id>\ServiceModelTimeTaken(http___cff_tele2_com_iclientservice_getactivevasserviceinformation)\TimeTaken</Id>
+		<Name>getactivevasserviceinformatio</Name>
+	</PerfCounter>
+	<PerfCounter>
+		<Id>\ServiceModelTimeTaken(http___cff_tele2_com_iclientservice_listavailablevasservices)\TimeTaken</Id>
+		<Name>listavailablevasservices</Name>
+	</PerfCounter>
+	<PerfCounter>
+		<Id>\ServiceModelTimeTaken(t2_tip_c_billingportal_getinvoicedetailswrapper_v02_action)\TimeTaken</Id>
+		<Name>_getinvoicedetails</Name>
+	</PerfCounter>
+</ArrayOfPerfCounter>
