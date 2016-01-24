@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Client
 {
@@ -22,41 +23,25 @@ namespace Client
                     return;
                 }
 
-                System.Threading.ThreadPool.QueueUserWorkItem(getThreadProc);
-                System.Threading.ThreadPool.QueueUserWorkItem(setThreadProc);
-                System.Threading.ThreadPool.QueueUserWorkItem(putThreadProc);
-                System.Threading.ThreadPool.QueueUserWorkItem(dumpThreadProc);
+                //System.Threading.ThreadPool.QueueUserWorkItem(GetThreadProc);
+                // System.Threading.ThreadPool.QueueUserWorkItem(setThreadProc);
+                // System.Threading.ThreadPool.QueueUserWorkItem(putThreadProc);
+                // System.Threading.ThreadPool.QueueUserWorkItem(dumpThreadProc);
 
-
-
+                //Task.Run(GetThreadProc);
+                GetThreadProc().ContinueWith(x => Console.WriteLine("Done"));
                 Console.WriteLine("Press any key to repeat and q to quit...");
             }
         }
 
-        static void getThreadProc(Object stateInfo)
+        static async Task GetThreadProc()
         {
-            int threadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine("Calling WCF Server from thread id...." + threadID);
+            int threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine("Calling WCF Server from thread id...." + threadId);
 
             ServiceReference1.StockMarketClient proxy = new ServiceReference1.StockMarketClient();
-            
+            await proxy.getStockValueAsync("");
 
-            string stockName = "threadID-" + threadID;
-
-            for (int j = 0; j < 30; j++)
-            {
-                stockName = "threadID-" + threadID + "-" + j + "-";
-                for (int i = 0; i < 100; i++)
-                {
-                    proxy.BegingetStockValue(stockName + i, null, null);
-                 
-                    if (i % 10 == 0)
-                    {
-                        System.Threading.Thread.Sleep(1000);
-                    }
-                }
-                System.Threading.Thread.Sleep(10000);
-            }
         }
 
         static void setThreadProc(Object stateInfo)
@@ -74,7 +59,7 @@ namespace Client
                 stockName = "threadID-" + threadID + "-" + j + "-";
                 for (int i = 0; i < 100; i++)
                 {
-                    proxy.BeginsetStockValue(stockName + i, null, null);
+                    //proxy.BeginsetStockValue(stockName + i, null, null);
 
                     if (i % 10 == 0)
                     {
@@ -100,7 +85,7 @@ namespace Client
                 stockName = "threadID-" + threadID + "-" + j + "-";
                 for (int i = 0; i < 100; i++)
                 {
-                    proxy.BeginputStockValue(stockName + i, null, null);
+                  //  proxy.BeginputStockValue(stockName + i, null, null);
 
                     if (i % 10 == 0)
                     {
@@ -125,7 +110,7 @@ namespace Client
             {
                 stockName = "threadID-" + threadID + "-" + j + "-";
                 
-               proxy.BegindumpStockValue(stockName + j, null, null);
+              // proxy.BegindumpStockValue(stockName + j, null, null);
 
                // System.Threading.Thread.Sleep(10000);
             }

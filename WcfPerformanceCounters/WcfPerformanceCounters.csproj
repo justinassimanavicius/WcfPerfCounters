@@ -42,14 +42,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GroupPerformanceCounter.cs" />
+    <Compile Include="CounterGroup.cs" />
+    <Compile Include="OperationState.cs" />
+    <Compile Include="ParameterInspector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WcfPerformanceCountersBehaviorExtensionElement.cs" />
     <Compile Include="WcfPerformanceCountersConfig.cs" />
     <Compile Include="WcfPerformanceCountersEndpointBehavior.cs" />
-    <Compile Include="MessageInspector.cs" />
-    <Compile Include="PerfmonCounters.cs" />
-    <Compile Include="ThreadPool.cs" />
+    <Compile Include="CounterProvider.cs" />
+    <Compile Include="Worker.cs" />
+    <Compile Include="WorkItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="captureDumpCmd.bat" />

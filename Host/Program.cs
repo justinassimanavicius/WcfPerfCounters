@@ -48,7 +48,8 @@ namespace Host
             string output = string.Format("DUMP : client requested stock value for symbol = {0}", strSymbol);
             System.Console.WriteLine(output);
 
-            System.Threading.Thread.Sleep(r.Next(25, 100) * 1000);
+            var next = 1;// r.Next(25, 100);
+            System.Threading.Thread.Sleep(next * 1000);
             return 100.0;
         }
 
@@ -57,7 +58,7 @@ namespace Host
             string output = string.Format("GET : client requested stock value for symbol = {0}", strSymbol);
             System.Console.WriteLine(output);
 
-            System.Threading.Thread.Sleep(r.Next(1, 25) * 1000);
+            System.Threading.Thread.Sleep(r.Next(1, 10) * 100);
             return 100.0;
         }
 

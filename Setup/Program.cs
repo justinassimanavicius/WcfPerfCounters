@@ -23,14 +23,14 @@ namespace Setup
 
 				if (String.Compare(args[0], "-i", StringComparison.OrdinalIgnoreCase) == 0)
 				{
-					PerfmonCounters.DeleteCategory();
-					PerfmonCounters.CreateCategory();
+					CounterProvider.DeleteCategory();
+					CounterProvider.CreateCategory();
 
 					Console.WriteLine("ServiceModelTimeTaken perfmon counters installed.");
 				}
 				else if (String.Compare(args[0], "-u", StringComparison.OrdinalIgnoreCase) == 0)
 				{
-					PerfmonCounters.DeleteCategory();
+					CounterProvider.DeleteCategory();
 
 					Console.WriteLine("ServiceModelTimeTaken perfmon counters uninstalled.");
 				}
@@ -40,7 +40,7 @@ namespace Setup
 					while (! Console.KeyAvailable)
 					{
 						i += 1;
-						var perfConter = PerfmonCounters.GetCounter("test");
+						var perfConter = CounterProvider.GetCounter("test");
 						Thread.Sleep(500);
 						perfConter.Executing.RawValue = i;// DateTime.Now.Second % 19;
 						perfConter.Hits.RawValue = DateTime.Now.Second % 4;

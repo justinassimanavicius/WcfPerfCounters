@@ -6,18 +6,17 @@ namespace WcfPerformanceCounters
 {
 	internal class WcfPerformanceCountersEndpointBehavior : IEndpointBehavior
 	{
-		private readonly WcfPerformanceCountersConfig _wcfPerformanceCountersConfig;
+        private static readonly Worker Worker = new Worker();
+
+        private readonly WcfPerformanceCountersConfig _config;
 
 		public WcfPerformanceCountersEndpointBehavior(WcfPerformanceCountersConfig config)
 		{
-			_wcfPerformanceCountersConfig = config;
+			_config = config;
 		}
 
-		public void ApplyDispatchBehavior(ServiceEndpoint endpoint,
-			EndpointDispatcher endpointDispatcher)
+		public void ApplyDispatchBehavior(ServiceEndpoint endpoint, EndpointDispatcher endpointDispatcher)
 		{
-			endpointDispatcher.DispatchRuntime.MessageInspectors.Add(
-				new MessageInspector(_wcfPerformanceCountersConfig));
 		}
 
 		public void AddBindingParameters(ServiceEndpoint endpoint, BindingParameterCollection bindingParameters)
@@ -26,11 +25,15 @@ namespace WcfPerformanceCounters
 
 		public void ApplyClientBehavior(ServiceEndpoint endpoint, ClientRuntime clientRuntime)
 		{
-			clientRuntime.MessageInspectors.Add(new MessageInspector(_wcfPerformanceCountersConfig));
-		}
+			foreach (ClientOperation operation in clientRuntime.Operations)
+            {
+                operation.ParameterInspectors.Add(new ParameterInspector(Worker, _config.InstanceNameFormat));
+            }
+        }
 
 		public void Validate(ServiceEndpoint endpoint)
 		{
 		}
-	}
+        
+    }
 }
